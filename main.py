@@ -1091,12 +1091,12 @@ class_names = [
   ]
 
 # start_inf_time = time.time()
-# model = YOLO('runs/classify/train/weights/best.pt')
+model = YOLO('runs/classify/train/weights/best.pt')
 
 # class_inference_times = []
-# class_valid_times = []
+class_valid_times = []
 # class_inf_top1_accuracies = []
-# class_val_top1_accuracies = []
+class_val_top1_accuracies = []
 
 # for class_name in class_names:
 #     class_start_time = time.time()
@@ -1133,7 +1133,7 @@ for class_name in class_names:
     class_path = os.path.join('data/plant/valid/', class_name)
     class_results = model(source=class_path, imgsz=640)
     class_inference_time = time.time() - class_start_time
-    class_inference_times.append(class_inference_time)
+    class_valid_times.append(class_inference_time)
     class_top1_confidences = []
     for result in class_results:
         top1_conf = result.probs.top1conf.cpu().numpy().item()
@@ -1142,7 +1142,7 @@ for class_name in class_names:
     class_val_top1_accuracies.append(class_top1_accuracy)
 
 total_validation_time = time.time() - start_val_time
-average_class_validation_time = np.mean(class_inference_times)
+average_class_validation_time = np.mean(class_valid_times)
 average_val_top1_accuracy = np.mean(class_val_top1_accuracies)
 
 """## Save validation results"""
