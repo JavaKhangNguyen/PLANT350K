@@ -15,14 +15,6 @@ os.chdir(HOME)
 
 # subprocess.run(['yolo','task=classify', 'mode=train', 'model=weight/yolov8m-cls.pt','data=home/ldtan/ldtan/PLANT350K/data/plant','epochs=400', 'batch=16', 'imgsz=640', 'dropout=0.2', 'save=True', 'save_period=10'])
 
-# """## Validating model"""
-
-# os.chdir(HOME)
-
-# with open('valid.txt', 'w') as f:
-#     result = subprocess.run(['yolo', 'task=classify', 'mode=val', 'model=runs/classify/train/weights/best.pt', 'imgsz=640', 'data=home/ldtan/ldtan/PLANT350K/data/plant'], capture_output=True, text=True)
-#     f.write(result.stdout)
-#     f.write(result.stderr)
 
 """## Inference model"""
 # Define the class names
@@ -1098,12 +1090,13 @@ class_names = [
     "zannichellia palustris"
   ]
 
-
-start_time = time.time()
+start_inf_time = time.time()
 model = YOLO('runs/classify/train/weights/best.pt')
 
 class_inference_times = []
-class_top1_accuracies = []
+class_valid_times = []
+class_inf_top1_accuracies = []
+class_val_top1_accuracies = []
 
 for class_name in class_names:
     class_start_time = time.time()
@@ -1117,24 +1110,45 @@ for class_name in class_names:
         top1_conf = result.probs.top1conf.cpu().numpy().item()
         class_top1_confidences.append(top1_conf)
     class_top1_accuracy = np.mean(class_top1_confidences)
-    class_top1_accuracies.append(class_top1_accuracy)
+    class_inf_top1_accuracies.append(class_top1_accuracy)
 
-total_inference_time = time.time() - start_time
+total_inference_time = time.time() - start_inf_time
 average_class_inference_time = np.mean(class_inference_times)
-average_top1_accuracy = np.mean(class_top1_accuracies)
+average_inf_top1_accuracy = np.mean(class_inf_top1_accuracies)
 
+
+"""## Save inference results"""
 with open('inference.txt', 'w') as f:
     f.write("Inference Results:\n")
-    f.write("+-----------------------+----------------------+----------------------+\n")
-    f.write("| Metric                | Value                |                      |\n")
-    f.write("+-----------------------+----------------------+----------------------+\n")
-    f.write(f"| Total number of classes         | {len(class_names):<20} |                      |\n")
-    f.write(f"| Total Inference Time            | {total_inference_time:.2f} seconds      |                      |\n")
-    f.write(f"| Average Class Inference Time    | {average_class_inference_time:.2f} seconds       |                      |\n")
-    f.write(f"| Average Accuracy                | {average_top1_accuracy:.3f}               |                      |\n")
-    f.write("+-----------------------+----------------------+----------------------+\n")
-    f.write("|        Class          |   Inference Time (s) |       Accuracy       |\n")
-    f.write("+-----------------------+----------------------+----------------------+\n")
-    for i, class_name in enumerate(class_names):
-        f.write(f"| {class_name:<20} | {class_inference_times[i]:20.2f} | {class_top1_accuracies[i]:20.2f} |\n")
-    f.write("+-----------------------+----------------------+----------------------+\n")
+    f.write(f"Total number of classes: {len(class_names):<20}\n")
+    f.write(f"Total Inference Time: {total_inference_time:.2f} seconds\n")
+    f.write(f"Average Class Inference Time: {average_class_inference_time:.2f} seconds\n")
+    f.write(f"Accuracy: {average_inf_top1_accuracy:.3f}\n")
+
+
+"""## Validating model"""
+start_val_time = time.time()
+for class_name in class_names:
+    class_start_time = time.time()
+    class_path = os.path.join('data/plant/valid/', class_name)
+    class_results = model(source=class_path, imgsz=640)
+    class_inference_time = time.time() - class_start_time
+    class_inference_times.append(class_inference_time)
+    class_top1_confidences = []
+    for result in class_results:
+        top1_conf = result.probs.top1conf.cpu().numpy().item()
+        class_top1_confidences.append(top1_conf)
+    class_top1_accuracy = np.mean(class_top1_confidences)
+    class_val_top1_accuracies.append(class_top1_accuracy)
+
+total_validation_time = time.time() - start_val_time
+average_class_validation_time = np.mean(class_inference_times)
+average_val_top1_accuracy = np.mean(class_val_top1_accuracies)
+
+"""## Save validation results"""
+with open('valid.txt', 'w') as f:
+    f.write("Validation Results:\n")
+    f.write(f"Total number of classes: {len(class_names):<20}\n")
+    f.write(f"Total Validation Time: {total_inference_time:.2f} seconds\n")
+    f.write(f"Average Class Validation Time: {average_class_inference_time:.2f} seconds\n")
+    f.write(f"Accuracy: {average_inf_top1_accuracy:.3f}\n")
