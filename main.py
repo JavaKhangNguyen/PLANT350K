@@ -11,9 +11,9 @@ HOME = os.getcwd()
 print(HOME)
 os.chdir(HOME)
 
-# """## Train model"""
+"""## Train model"""
 
-# subprocess.run(['yolo','task=classify', 'mode=train', 'model=weight/yolov8m-cls.pt','data=home/ldtan/ldtan/PLANT350K/data/plant','epochs=400', 'batch=16', 'imgsz=640', 'dropout=0.2', 'save=True', 'save_period=10'])
+subprocess.run(['yolo','task=classify', 'mode=train', 'model=weight/yolov8m-cls.pt','data=home/ldtan/ldtan/PLANT350K/data/plant','epochs=400', 'batch=16', 'imgsz=640', 'dropout=0.2', 'save=True', 'save_period=10'])
 
 
 """## Inference model"""
@@ -1093,37 +1093,37 @@ class_names = [
 # start_inf_time = time.time()
 model = YOLO('runs/classify/train/weights/best.pt')
 
-# class_inference_times = []
+class_inference_times = []
 class_valid_times = []
-# class_inf_top1_accuracies = []
+class_inf_top1_accuracies = []
 class_val_top1_accuracies = []
 
-# for class_name in class_names:
-#     class_start_time = time.time()
-#     class_path = os.path.join('data/plant/test/', class_name)
-#     class_results = model(source=class_path, imgsz=640)
-#     class_inference_time = time.time() - class_start_time
-#     class_inference_times.append(class_inference_time)
+for class_name in class_names:
+    class_start_time = time.time()
+    class_path = os.path.join('data/plant/test/', class_name)
+    class_results = model(source=class_path, imgsz=640)
+    class_inference_time = time.time() - class_start_time
+    class_inference_times.append(class_inference_time)
 
-#     class_top1_confidences = []
-#     for result in class_results:
-#         top1_conf = result.probs.top1conf.cpu().numpy().item()
-#         class_top1_confidences.append(top1_conf)
-#     class_top1_accuracy = np.mean(class_top1_confidences)
-#     class_inf_top1_accuracies.append(class_top1_accuracy)
+    class_top1_confidences = []
+    for result in class_results:
+        top1_conf = result.probs.top1conf.cpu().numpy().item()
+        class_top1_confidences.append(top1_conf)
+    class_top1_accuracy = np.mean(class_top1_confidences)
+    class_inf_top1_accuracies.append(class_top1_accuracy)
 
-# total_inference_time = time.time() - start_inf_time
-# average_class_inference_time = np.mean(class_inference_times)
-# average_inf_top1_accuracy = np.mean(class_inf_top1_accuracies)
+total_inference_time = time.time() - start_inf_time
+average_class_inference_time = np.mean(class_inference_times)
+average_inf_top1_accuracy = np.mean(class_inf_top1_accuracies)
 
 
-# """## Save inference results"""
-# with open('inference.txt', 'w') as f:
-#     f.write("Inference Results:\n")
-#     f.write(f"Total number of classes: {len(class_names):<20}\n")
-#     f.write(f"Total Inference Time: {total_inference_time:.2f} seconds\n")
-#     f.write(f"Average Class Inference Time: {average_class_inference_time:.2f} seconds\n")
-#     f.write(f"Accuracy: {average_inf_top1_accuracy:.3f}\n")
+"""## Save inference results"""
+with open('inference.txt', 'w') as f:
+    f.write("Inference Results:\n")
+    f.write(f"Total number of classes: {len(class_names):<20}\n")
+    f.write(f"Total Inference Time: {total_inference_time:.2f} seconds\n")
+    f.write(f"Average Class Inference Time: {average_class_inference_time:.2f} seconds\n")
+    f.write(f"Accuracy: {average_inf_top1_accuracy:.3f}\n")
 
 
 """## Validating model"""
