@@ -13,7 +13,7 @@ os.chdir(HOME)
 
 """## Train model"""
 
-subprocess.run(['yolo','task=classify', 'mode=train', 'model=weight/yolov8m-cls.pt','data=home/ldtan/ldtan/PLANT350K/data/plant','epochs=400', 'batch=16', 'imgsz=640', 'dropout=0.2', 'save=True', 'save_period=10'])
+subprocess.run(['yolo','task=classify', 'mode=train', 'model=weight/yolo11m-cls.pt','data=home/ldtan/ldtan/PLANT350K/data/plant','epochs=400', 'batch=16', 'imgsz=640', 'dropout=0.2', 'save=True', 'save_period=10'])
 
 
 """## Inference model"""
